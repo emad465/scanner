@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اسکنر پیشرفته IP - Cloudflare & Fastly</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .progress-bar-inner {
+            transition: width 0.3s ease-in-out;
+            background: linear-gradient(90deg, #00b4db, #0083b0);
+        }
+        .table-row-appear {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .service-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 180, 219, 0.3);
+        }
+        .service-card.selected {
+            border-color: #00b4db;
+            box-shadow: 0 0 20px rgba(0, 180, 219, 0.5);
+        }
+        .beat-text {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        @keyframes glow {
+            from { text-shadow: 0 0 5px #ff6b6b; }
+            to { text-shadow: 0 0 20px #4ecdc4; }
+        }
+        /* Custom styles for slider */
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #00b4db;
+            border-radius: 50%;
+            cursor: pointer;
+            margin-top: -6px;
+        }
+        input[type=range]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #00b4db;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-gray-200 overflow-x-hidden">
+
+    <header class="text-center py-12 mb-8">
+        <h1 class="text-5xl md:text-7xl font-bold mb-4">
+            <span class="beat-text">Emad ON The BEAT</span> 👊
+        </h1>
+        <p class="text-xl text-gray-400">اسکنر پیشرفته برای یافتن سریع‌ترین IPهای Cloudflare و Fastly 💥</p>
+    </header>
+
+    <div class="container mx-auto px-4 py-8 flex flex-col items-center">
+
+        <div class="w-full max-w-5xl mb-8">
+            <h2 class="text-2xl font-semibold text-white mb-6 text-center">۱. سرویس مورد نظر را انتخاب کنید:</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="service-card glass-effect rounded-2xl p-8 text-center selected" data-service="cloudflare">
+                    <i class="fas fa-cloud text-4xl text-blue-400 mb-4"></i>
+                    <h3 class="text-xl font-bold text-white">Cloudflare Scanner</h3>
+                    <p class="text-gray-400">اسکن رنج‌های به‌روز Cloudflare</p>
+                </div>
+                <div class="service-card glass-effect rounded-2xl p-8 text-center" data-service="fastly">
+                    <i class="fas fa-bolt text-4xl text-yellow-400 mb-4"></i>
+                    <h3 class="text-xl font-bold text-white">Fastly Scanner</h3>
+                    <p class="text-gray-400">اسکن رنج‌های به‌روز Fastly</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="w-full max-w-5xl glass-effect rounded-2xl p-8 mb-8 shadow-2xl">
+            <h2 class="text-2xl font-semibold text-white mb-6 text-center">۲. تنظیمات اسکن را مشخص کنید:</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                <div>
+                    <label for="ipRangeSelect" class="block mb-2 text-sm font-medium text-white">رنج IP:</label>
+                    <select id="ipRangeSelect" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 disabled:opacity-50">
+                        </select>
+                </div>
+                 <div>
+                    <label for="concurrencySlider" class="block mb-2 text-sm font-medium text-white">تعداد تست همزمان (Threads): <span id="concurrencyValue" class="font-bold text-blue-400">15</span></label>
+                    <input id="concurrencySlider" type="range" min="5" max="30" value="15" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                </div>
+                <div class="md:col-span-2">
+                    <label for="ipCountSlider" class="block mb-2 text-sm font-medium text-white">تعداد IP برای تست از هر رنج: <span id="ipCountValue" class="font-bold text-blue-400">150</span></label>
+                    <input id="ipCountSlider" type="range" min="50" max="300" value="150" step="10" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                </div>
+            </div>
+            
+             <div class="mt-8 text-center">
+                 <p id="errorText" class="text-red-400 text-sm mb-4 hidden"></p>
+                <button id="startButton" class="w-full md:w-auto bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i class="fas fa-rocket mr-2"></i>شروع اسکن پیشرفته
+                </button>
+                <button id="stopButton" class="w-full md:w-auto bg-gradient-to-r from-red-500 to-yellow-600 hover:from-red-600 hover:to-yellow-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 hidden">
+                    <i class="fas fa-stop mr-2"></i>توقف اسکن
+                </button>
+            </div>
+
+            <div id="progressContainer" class="mt-6 hidden pt-6 border-t border-gray-700/50">
+                <div class="flex justify-between mb-1">
+                    <span id="statusText" class="text-base font-medium text-blue-400">در حال آماده‌سازی...</span>
+                    <span id="progressPercentage" class="text-sm font-medium text-white">0%</span>
+                </div>
+                <div class="w-full bg-gray-700 rounded-full h-2.5">
+                    <div id="progressBar" class="h-2.5 rounded-full progress-bar-inner" style="width: 0%"></div>
+                </div>
+                 <div id="scanSummary" class="text-center mt-3 text-gray-400 text-sm"></div>
+            </div>
+        </div>
+
+        <div class="w-full max-w-5xl">
+            <h3 class="text-2xl font-semibold text-white mb-4 text-center">🔥 نتایج برتر (مرتب‌شده بر اساس سرعت)</h3>
+            <div class="glass-effect rounded-2xl shadow-2xl overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left text-gray-300">
+                        <thead class="text-xs text-blue-400 uppercase bg-gray-800/50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-center">رتبه</th>
+                                <th scope="col" class="px-6 py-3">آدرس IP</th>
+                                <th scope="col" class="px-6 py-3 text-center">میانگین تاخیر (ms)</th>
+                                <th scope="col" class="px-6 py-3 text-center">نوسان (Jitter)</th>
+                                <th scope="col" class="px-6 py-3 text-center">وضعیت</th>
+                                <th scope="col" class="px-6 py-3 text-center">کپی</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsBody">
+                           <tr>
+                                <td colspan="6" class="text-center py-12 text-gray-500">
+                                    <i class="fas fa-search text-3xl mb-2"></i><br>
+                                    برای مشاهده نتایج، تنظیمات را مشخص کرده و اسکن را شروع کنید.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <footer class="text-center mt-12 text-gray-500 text-sm">
+             <p>ساخته شده توسط Emad Gang | بازنویسی و بهینه‌سازی توسط Gemini AI 🚀</p>
+        </footer>
+    </div>
+
+    <script>
+        // --- DOM Elements ---
+        const serviceCards = document.querySelectorAll('.service-card');
+        const startButton = document.getElementById('startButton');
+        const stopButton = document.getElementById('stopButton');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const progressPercentage = document.getElementById('progressPercentage');
+        const statusText = document.getElementById('statusText');
+        const resultsBody = document.getElementById('resultsBody');
+        const ipRangeSelect = document.getElementById('ipRangeSelect');
+        const errorText = document.getElementById('errorText');
+        const concurrencySlider = document.getElementById('concurrencySlider');
+        const concurrencyValue = document.getElementById('concurrencyValue');
+        const ipCountSlider = document.getElementById('ipCountSlider');
+        const ipCountValue = document.getElementById('ipCountValue');
+        const scanSummary = document.getElementById('scanSummary');
+
+        // --- Data: Updated Ranges (2025) ---
+        const rangesData = {
+            cloudflare: ['173.245.48.0/20', '103.21.244.0/22', '103.22.200.0/22', '103.31.4.0/22', '141.101.64.0/18', '108.162.192.0/18', '190.93.240.0/20', '188.114.96.0/20', '197.234.240.0/22', '198.41.128.0/17', '162.158.0.0/15', '104.16.0.0/13', '104.24.0.0/14', '172.64.0.0/13', '131.0.72.0/22', '141.101.128.0/17', '104.16.0.0/12'],
+            fastly: ['23.235.32.0/20', '43.249.72.0/22', '103.244.50.0/24', '103.245.222.0/23', '103.245.224.0/24', '104.156.80.0/20', '140.248.64.0/18', '140.248.128.0/17', '146.75.0.0/17', '151.101.0.0/16', '157.52.64.0/18', '167.82.0.0/17', '167.82.128.0/20', '167.82.160.0/20', '167.82.224.0/20', '172.111.64.0/18', '185.31.16.0/22', '199.27.72.0/21', '199.232.0.0/16']
+        };
+
+        // --- State management ---
+        let scannerState = {
+            isRunning: false,
+            currentService: 'cloudflare',
+            currentEndpoint: '/cdn-cgi/trace',
+            allResults: [],
+        };
+        
+        // --- Functions ---
+        
+        function selectService(service) {
+            scannerState.currentService = service;
+            scannerState.currentEndpoint = service === 'cloudflare' ? '/cdn-cgi/trace' : '/.well-known/traffic-advice';
+            
+            serviceCards.forEach(card => {
+                card.classList.toggle('selected', card.dataset.service === service);
+            });
+            
+            populateIpRanges();
+            ipRangeSelect.value = '';
+        }
+        
+        function populateIpRanges() {
+            ipRangeSelect.innerHTML = '<option selected value="">-- یک رنج را انتخاب کنید --</option><option value="all">اسکن تمام رنج‌ها</option>';
+            const ranges = rangesData[scannerState.currentService];
+            ranges.forEach(range => {
+                const option = document.createElement('option');
+                option.value = range;
+                option.textContent = range;
+                ipRangeSelect.appendChild(option);
+            });
+        }
+        
+        function generateIpsFromCidr(cidr, count) {
+            try {
+                let [ip, mask] = cidr.split('/');
+                mask = parseInt(mask, 10);
+                if (isNaN(mask) || mask < 8 || mask > 32) return []; // /8 is a practical limit
+                
+                const start = ip.split('.').reduce((acc, octet) => (acc << 8) + parseInt(octet, 10), 0) >>> 0;
+                const numHosts = 1 << (32 - mask);
+                
+                if (count > numHosts) count = numHosts;
+
+                const ips = new Set();
+                // To avoid getting stuck in a loop for small ranges, limit attempts
+                const maxAttempts = count * 3;
+                let attempts = 0;
+                while (ips.size < count && attempts < maxAttempts) {
+                    const randomIpNum = start + Math.floor(Math.random() * numHosts);
+                    const ipStr = [
+                        (randomIpNum >> 24) & 255, (randomIpNum >> 16) & 255,
+                        (randomIpNum >> 8) & 255, randomIpNum & 255
+                    ].join('.');
+                    ips.add(ipStr);
+                    attempts++;
+                }
+                return Array.from(ips);
+            } catch (error) {
+                console.error(`Failed to generate IPs for ${cidr}:`, error);
+                return [];
+            }
+        }
+        
+        /**
+         * Advanced connectivity test using multiple probes to calculate latency and jitter.
+         */
+        async function testIpConnectivity(ip) {
+            const PINGS = 3;
+            const TIMEOUT = 2500;
+            let latencies = [];
+
+            for (let i = 0; i < PINGS; i++) {
+                const controller = new AbortController();
+                const signal = controller.signal;
+                
+                const fetchPromise = new Promise(async (resolve) => {
+                    const startTime = performance.now();
+                    try {
+                        await fetch(`https://${ip}${scannerState.currentEndpoint}`, {
+                            method: 'GET',
+                            mode: 'no-cors',
+                            signal: signal,
+                            cache: 'no-store'
+                        });
+                    } catch (e) {
+                        // Expected error, we just care about timing
+                    } finally {
+                        resolve(performance.now() - startTime);
+                    }
+                });
+
+                const timeoutPromise = new Promise(resolve => {
+                    setTimeout(() => {
+                        controller.abort();
+                        resolve(TIMEOUT);
+                    }, TIMEOUT);
+                });
+                
+                const latency = await Promise.race([fetchPromise, timeoutPromise]);
+                latencies.push(latency);
+            }
+            
+            const validLatencies = latencies.filter(l => l < TIMEOUT && l > 10); // Ignore timeouts and suspiciously fast pings
+            if (validLatencies.length < PINGS -1) { // Require at least 2 successful pings
+                 return { ip, latency: Infinity, jitter: Infinity, status: 'ناموفق' };
+            }
+
+            const avgLatency = validLatencies.reduce((a, b) => a + b, 0) / validLatencies.length;
+            const jitter = Math.sqrt(validLatencies.map(l => Math.pow(l - avgLatency, 2)).reduce((a, b) => a + b, 0) / validLatencies.length);
+
+            let status = 'ضعیف 🐌';
+            if (avgLatency < 500) status = 'خوب ⚡️';
+            if (avgLatency < 250) status = 'عالی 🚀';
+            
+            return {
+                ip,
+                latency: Math.round(avgLatency),
+                jitter: Math.round(jitter),
+                status
+            };
+        }
+
+        function displayResults() {
+            resultsBody.innerHTML = '';
+            if (scannerState.allResults.length === 0) return;
+
+            // Sort by latency, then jitter
+            scannerState.allResults.sort((a, b) => {
+                if(a.latency === b.latency) return a.jitter - b.jitter;
+                return a.latency - b.latency;
+            });
+            
+            scannerState.allResults.slice(0, 100).forEach((result, index) => {
+                const row = document.createElement('tr');
+                row.className = 'bg-gray-800/30 border-b border-gray-700/50 hover:bg-gray-700/50 table-row-appear';
+                row.style.animationDelay = `${index * 0.03}s`;
+
+                const latencyClass = result.latency < 250 ? 'text-green-400' : result.latency < 500 ? 'text-yellow-400' : 'text-red-400';
+
+                row.innerHTML = `
+                    <td class="px-6 py-4 text-center font-bold text-blue-400">${index + 1}</td>
+                    <td class="px-6 py-4 font-mono text-white">${result.ip}</td>
+                    <td class="px-6 py-4 text-center font-semibold ${latencyClass}">${result.latency} ms</td>
+                    <td class="px-6 py-4 text-center text-gray-400">${result.jitter} ms</td>
+                    <td class="px-6 py-4 text-center">${result.status}</td>
+                    <td class="px-6 py-4 text-center">
+                        <button class="copy-btn text-gray-400 hover:text-white" data-ip="${result.ip}">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </td>
+                `;
+                resultsBody.appendChild(row);
+            });
+        }
+        
+        async function startScan() {
+            const selectedRange = ipRangeSelect.value;
+            if (!selectedRange) {
+                errorText.textContent = 'لطفاً یک رنج IP را برای اسکن انتخاب کنید!';
+                errorText.classList.remove('hidden');
+                return;
+            }
+            errorText.classList.add('hidden');
+            
+            setUiForScanning(true);
+            scannerState.isRunning = true;
+            scannerState.allResults = [];
+            
+            statusText.textContent = 'در حال تولید لیست IP...';
+            const rangesToScan = selectedRange === 'all' ? rangesData[scannerState.currentService] : [selectedRange];
+            const ipCountPerRange = parseInt(ipCountSlider.value);
+            
+            let allIps = rangesToScan.flatMap(range => generateIpsFromCidr(range, ipCountPerRange));
+            allIps = [...new Set(allIps)]; // Remove duplicates
+
+            if (allIps.length === 0) {
+                statusText.textContent = 'خطا در تولید IP!';
+                resultsBody.innerHTML = `<tr><td colspan="6" class="text-center py-12 text-red-400">خطا! رنج انتخاب شده معتبر نیست.</td></tr>`;
+                setUiForScanning(false);
+                return;
+            }
+
+            const totalIps = allIps.length;
+            let testedIps = 0;
+            statusText.textContent = `شروع اسکن ${totalIps} آدرس IP...`;
+            scanSummary.textContent = '';
+            
+            const batchSize = parseInt(concurrencySlider.value);
+            for (let i = 0; i < totalIps; i += batchSize) {
+                if (!scannerState.isRunning) {
+                    statusText.textContent = 'اسکن توسط کاربر متوقف شد.';
+                    break;
+                }
+                
+                const batch = allIps.slice(i, i + batchSize);
+                statusText.textContent = `در حال تست ${batch.length} آدرس از ${batch[0]}`;
+                
+                const promises = batch.map(ip => testIpConnectivity(ip));
+                const batchResults = await Promise.all(promises);
+                
+                const validResults = batchResults.filter(r => r.latency !== Infinity);
+                scannerState.allResults.push(...validResults);
+                
+                displayResults();
+                
+                testedIps = Math.min(i + batchSize, totalIps);
+                const percentage = Math.round((testedIps / totalIps) * 100);
+                progressBar.style.width = `${percentage}%`;
+                progressPercentage.textContent = `${percentage}%`;
+            }
+            
+            if (scannerState.isRunning) {
+                statusText.textContent = 'اسکن کامل شد! بهترین نتایج نمایش داده شده‌اند.';
+                scanSummary.textContent = `تست کامل شد. ${scannerState.allResults.length} IP موفق از ${totalIps} IP پیدا شد.`;
+            }
+            
+            setUiForScanning(false);
+        }
+
+        function stopScan() {
+            scannerState.isRunning = false;
+        }
+
+        function setUiForScanning(isScanning) {
+            startButton.classList.toggle('hidden', isScanning);
+            stopButton.classList.toggle('hidden', !isScanning);
+            ipRangeSelect.disabled = isScanning;
+            concurrencySlider.disabled = isScanning;
+            ipCountSlider.disabled = isScanning;
+            
+            if (isScanning) {
+                progressContainer.classList.remove('hidden');
+                progressBar.style.width = '0%';
+                progressPercentage.textContent = '0%';
+                resultsBody.innerHTML = `<tr><td colspan="6" class="text-center py-12 text-blue-400 animate-pulse"><i class="fas fa-bolt text-3xl mb-2"></i><br>اسکن پیشرفته در حال اجراست... لطفاً صبور باشید.</td></tr>`;
+            }
+        }
+        
+        // --- Event Listeners ---
+        document.addEventListener('DOMContentLoaded', () => {
+            selectService('cloudflare'); // Default to Cloudflare
+            concurrencyValue.textContent = concurrencySlider.value;
+            ipCountValue.textContent = ipCountSlider.value;
+        });
+
+        serviceCards.forEach(card => {
+            card.addEventListener('click', (e) => selectService(e.currentTarget.dataset.service));
+        });
+
+        startButton.addEventListener('click', startScan);
+        stopButton.addEventListener('click', stopScan);
+        
+        concurrencySlider.addEventListener('input', (e) => {
+            concurrencyValue.textContent = e.target.value;
+        });
+        
+        ipCountSlider.addEventListener('input', (e) => {
+            ipCountValue.textContent = e.target.value;
+        });
+        
+        resultsBody.addEventListener('click', (e) => {
+            const button = e.target.closest('.copy-btn');
+            if (button) {
+                const ip = button.dataset.ip;
+                navigator.clipboard.writeText(ip).then(() => {
+                    button.innerHTML = '<i class="fas fa-check text-green-500"></i>';
+                    setTimeout(() => {
+                        button.innerHTML = '<i class="fas fa-copy"></i>';
+                    }, 1500);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
